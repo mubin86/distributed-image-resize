@@ -9,10 +9,6 @@ const App = () => {
         <Route path='/' exact>
           <HomePage />
         </Route>
-        
-        {/* <Route path='/new-meetup'>
-          <NewMeetupPage />
-        </Route> */}
       </Switch>
     </Layout>
   );
