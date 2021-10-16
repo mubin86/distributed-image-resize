@@ -37,12 +37,15 @@ exports.upload = multer({
 
 exports.imageUploadResponse = (req, res, next) => {
     console.log("req.file is ", req.files);
+    let location = [];
+    let key = []
+    req.files.map(file => (key.push(file.key) && location.push(file.location)));
         res.status(200).json({
             status: 'success',
             message: 'Files Uploaded',
             data: {
-                imageKey: req.files[0].key,
-                location: req.files[0].location
+                key,
+                location
             }
         })
 };
