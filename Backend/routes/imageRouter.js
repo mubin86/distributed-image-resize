@@ -6,4 +6,7 @@ router
 .route('/image-upload')
 .post(upload.array('images'), imageUploadResponse);
 
+router
+.route('/create-request')
+.post()
 module.exports = router;

@@ -5,6 +5,7 @@ const express = require('express');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 const imageRouter = require('./routes/imageRouter');
+const sqsRouter = require('./routes/sqsRouter');
 const app = express();
 
 
@@ -19,7 +20,7 @@ if(process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
 
-app.use('/api', imageRouter);
+app.use('/api', imageRouter, sqsRouter);
 
 app.all('*', (req, res, next) => {
     next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
