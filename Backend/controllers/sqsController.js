@@ -1,8 +1,11 @@
 require('dotenv').config();
 const AppError = require('./../utils/appError');
 const AWS = require("aws-sdk");
+const { Consumer } = require('sqs-consumer');
 const crypto = require('crypto');
 AWS.config.update({region: 'us-east-1'});
+const https = require('https');
+const http = require("http");
 const sqs = new AWS.SQS({apiVersion: '2012-11-05'});
 
 let result = [];
@@ -14,10 +17,17 @@ async function sendMessages(queueUrl, reqbody) {
                     QueueUrl: queueUrl,
                     Entries: []
                 };
-    
+
+                let imageData = {
+                    'imageUrl': imgUrl[i],
+                    'width': reqbody.width,
+                    'height': reqbody.height,
+                };
+
+
                 params.Entries.push({
                     Id: crypto.randomBytes(15).toString('hex'),
-                    MessageBody: 'iamge with resize data',
+                    MessageBody: JSON.stringify(imageData), //***must be pass as a total object
                     MessageAttributes: {
                         "imageUrl": {
                             DataType: "String",
@@ -37,6 +47,7 @@ async function sendMessages(queueUrl, reqbody) {
                 const res = await sqs.sendMessageBatch(params).promise();
                 result.push(res);
                 console.log("sendMessageBatch res is ", res);
+                console.log("result array is ", result);
             }
         } catch (error) {
             console.log("error occured sendMessageBatch ", error);
@@ -96,3 +107,30 @@ exports.sendImageWithResizeData = async (req, res, next) => {
     }
     
 }
+
+//have to move this into seperate handler
+const consumer = Consumer.create({
+    queueUrl: process.env.AWS_SQS_URL,
+    handleMessageBatch: async (message) => {
+        console.log("message from consumer is ", message);
+        // console.log("consumer body is ", JSON.parse(message[0].Body));
+    },
+    sqs: new AWS.SQS({
+        httpOptions: {
+        agent: new https.Agent({
+            keepAlive: true //avoid connect time on each request
+        })
+        }
+    })
+});
+
+consumer.on('error', (err) => {
+  console.error(err.message);
+  //
+});
+
+consumer.on('processing_error', (err) => {
+  console.error(err.message);
+});
+
+consumer.start();
