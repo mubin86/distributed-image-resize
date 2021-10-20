@@ -1,5 +1,5 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import Modal from 'react-modal';
 import axios from 'axios';
 import Home from '../components/home/Home';
@@ -15,9 +15,11 @@ export default function HomePage() {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [resizeValue, setResizeValue] = useState(null);
 
+    const history = useHistory();
+
     const imageResizeData = [
         {id: 1, width: 300, height: 300},
-        {id: 2, width: 600, height: 600},
+        {id: 2, width: 600, height: 600}, //****configure some other resize option && width and height will be taken as input
         {id: 3, width: 900, height: 900},
     ];
 
@@ -49,6 +51,7 @@ export default function HomePage() {
 
     const fileSubmitHandler = async (e) => {
         try {
+            // isSuccessfull(false);
             // setError(false);
             if(!selectedFile){
                 console.log('file not attached');
@@ -62,7 +65,6 @@ export default function HomePage() {
                 setErrorMessage('Resize option is not selected');
                 return;
             }
-
             if(!error){
                 console.log("api calling");
                 const fd = new FormData();
@@ -79,7 +81,7 @@ export default function HomePage() {
                 isSuccessfull(true);
                 setSelectedFile(null);
 
-                //sqs api will be called
+                //********sqs api will be called
             }else{
                 console.log('error occured');
                 e.preventDefault();
@@ -90,8 +92,12 @@ export default function HomePage() {
         }
     }
 
-    return (
-        <React.Fragment>
+        // if(successfull){
+        //     history.push('/')
+        // }else{
+
+            return (
+                <React.Fragment>
                 <Modal isOpen={modalIsOpen} className="mymodal" overlayClassName="myoverlay"  onRequestClose={() => setModalIsOpen(false)}>
                     <ModalContent
                         imageResizeData={imageResizeData}
@@ -105,6 +111,7 @@ export default function HomePage() {
                     errorMessage={errorMessage}
                     successfull={successfull}
                 />
-        </React.Fragment>
-    )
-}
+                </React.Fragment>
+            )
+        }
+

@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const aws = require("aws-sdk");
 const multer = require('multer');
 const multerS3 = require('multer-s3');
+let request = require('request');
 
 const bucketName = process.env.AWS_BUCKET_NAME;
 const region = process.env.AWS_BUCKET_REGION;
@@ -16,6 +17,22 @@ const s3 = new aws.S3({
     region
 });
 
+//             let params = {
+//                     Bucket: bucketName, 
+//                     Key: '', 
+//                     Tagging: "public=yes",
+//                     Body: '',
+//                     // ContentType: file.mimetype
+//                 };
+//              s3.putObject(params, function(err, data) {
+//                     if (err) {
+//                     console.log(err, err.stack); // an error occurred
+//                     } else {
+//                     console.log("data is ", data);           // successful response
+//                     }
+//                 });
+
+
 exports.upload = multer({
     storage: multerS3({
         s3,
@@ -25,7 +42,6 @@ exports.upload = multer({
                 originalname: file.originalname
             });
         },
-        // acl: 'public-read',
         contentType: multerS3.AUTO_CONTENT_TYPE,
         key: function (req, file, cb) {
             const extension = file.originalname.split('.').pop();
@@ -38,8 +54,10 @@ exports.upload = multer({
 exports.imageUploadResponse = (req, res, next) => {
     console.log("req.file is ", req.files);
     let location = [];
-    let key = []
+    let key = [];
+
     req.files.map(file => (key.push(file.key) && location.push(file.location)));
+
         res.status(200).json({
             status: 'success',
             message: 'Files Uploaded',
@@ -48,4 +66,5 @@ exports.imageUploadResponse = (req, res, next) => {
                 location
             }
         })
+    
 };
